@@ -2,8 +2,9 @@ name: Publish to the MCP registry
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [release]
     paths: [server.json]
+    tags: ["v*"]
 permissions:
   id-token: write
   contents: read
@@ -11,11 +12,29 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install mcp-publisher
         run: |
-          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
       - name: Log in with GitHub OIDC
         run: ./mcp-publisher login github-oidc
-      - name: Publish
-        run: ./mcp-publisher publish
+      - name: Publish if this version is not already in the registry
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys, urllib.error, urllib.parse, urllib.request
+          server = json.load(open("server.json"))
+          name = urllib.parse.quote(server["name"], safe="")
+          version = urllib.parse.quote(server["version"], safe="")
+          url = f"https://registry.modelcontextprotocol.io/v0.1/servers/{name}/versions/{version}"
+          try:
+              with urllib.request.urlopen(url) as response:
+                  response.read()
+          except urllib.error.HTTPError as exc:
+              if exc.code != 404:
+                  print(f"Registry lookup failed: HTTP {exc.code}", file=sys.stderr)
+                  sys.exit(1)
+          else:
+              print(f"{server['name']} {server['version']} is already published.")
+              sys.exit(0)
+          sys.exit(subprocess.call(["./mcp-publisher", "publish"]))
+          PY

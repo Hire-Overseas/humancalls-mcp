@@ -2,7 +2,7 @@
   "mcpServers": {
     "humancalls": {
       "type": "http",
-      "url": "https://calls.hireoverseas.com/mcp"
+      "url": "https://humancalls.ai/mcp"
     }
   }
 }
