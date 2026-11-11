@@ -1,0 +1,15 @@
+{
+  "name": "humancalls",
+  "owner": {
+    "name": "Hire Overseas",
+    "url": "https://www.hireoverseas.com"
+  },
+  "plugins": [
+    {
+      "name": "humancalls",
+      "source": "./",
+      "description": "A real person phones a US or Canadian business for you and reports back what was said."
+    }
+  ],
+  "description": "HumanCalls.ai: have a person make the phone call, from your AI assistant."
+}
