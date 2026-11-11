@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.Hire-Overseas/humancalls-mcp",
   "description": "A real person phones a US or Canadian business for you and reports back what was said.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "url": "https://github.com/Hire-Overseas/humancalls-mcp",
     "source": "github"
@@ -10,8 +10,8 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://calls.hireoverseas.com/mcp"
+      "url": "https://humancalls.ai/mcp"
     }
   ],
-  "websiteUrl": "https://calls.hireoverseas.com"
+  "websiteUrl": "https://humancalls.ai"
 }

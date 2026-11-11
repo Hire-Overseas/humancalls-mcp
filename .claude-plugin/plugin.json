@@ -1,14 +1,14 @@
 {
   "name": "humancalls",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Have a real person phone a US or Canadian business for you and report back: stock checks, quotes, opening hours, appointment inquiries and follow-ups.",
   "author": {
     "name": "Hire Overseas",
-    "url": "https://www.hireoverseas.com"
+    "url": "https://humancalls.ai"
   },
-  "homepage": "https://calls.hireoverseas.com",
+  "homepage": "https://humancalls.ai",
   "repository": "https://github.com/Hire-Overseas/humancalls-mcp",
   "license": "MIT",
   "keywords": ["phone", "calls", "human-in-the-loop", "errands", "business", "assistant"],
-  "privacyPolicyUrl": "https://calls.hireoverseas.com/privacy"
+  "privacyPolicyUrl": "https://humancalls.ai/privacy"
 }

@@ -1,53 +1,117 @@
-# HumanCalls.ai MCP
+# HumanCalls
 
-Have a real person make the phone call. This connects Claude, ChatGPT, Grok, Cursor and other MCP clients to [HumanCalls.ai](https://calls.hireoverseas.com) by [Hire Overseas](https://www.hireoverseas.com): your assistant describes a call to a business in the United States or Canada, a person places it, and a reviewed summary comes back.
+A person phones a US or Canadian business for you and reports back what was said.
 
-**Server URL:** `https://calls.hireoverseas.com/mcp` (Streamable HTTP, OAuth sign-in with your email)
+HumanCalls connects Claude, ChatGPT, Cursor and other MCP clients to [HumanCalls](https://humancalls.ai). Your assistant describes the call, a person places it, and a reviewed summary comes back. Callers introduce themselves, say who they are calling for, and say the call is recorded.
+
+**Server URL:** `https://humancalls.ai/mcp` (Streamable HTTP, OAuth 2.1 with PKCE)
 
 Ask things like:
 
-- "Have someone call Ace Plumbing at (303) 555-0199 and ask their earliest appointment for a leaking water heater."
-- "Call Harbor Supply and ask if SKU 7712 is in stock and what 40 units cost."
+- "Call Harbor Supply at (512) 555-0142 and ask if SKU 7712 is in stock and what 40 units cost. Information only."
+- "Call Lakeside Hardware and ask if they are open on Friday and whether they cut keys in store."
 - "How did that call go?"
 
 ## Install
 
-- **Claude Code:** `/plugin marketplace add Hire-Overseas/humancalls-mcp`, then `/plugin install humancalls@humancalls`.
-- **Claude (web and desktop):** Customize → Connectors → Add custom connector, and paste the server URL.
-- **ChatGPT:** Plugins → Add → Add custom MCP server, and paste the server URL.
-- **Grok:** grok.com/connectors → New Connector → Custom, and paste the server URL.
-- **Cursor, VS Code and other MCP clients:** add an HTTP server with the URL above.
+### Claude Code
 
-The first time, you sign in with your email and a six-digit code. A new account gets 10 free call minutes.
+```
+claude mcp add --transport http humancalls https://humancalls.ai/mcp
+```
+
+Start Claude Code, type `/mcp`, pick humancalls and sign in. Your browser opens HumanCalls. Enter your email and the six-digit code, then choose Allow. A first sign-in creates a workspace with 10 free minutes once you verify your email.
+
+This repository is also a Claude plugin, which adds the same server plus a skill for requesting and following up calls: `/plugin marketplace add Hire-Overseas/humancalls-mcp`, then `/plugin install humancalls@humancalls`.
+
+### Cursor
+
+Add this to `~/.cursor/mcp.json`, or to `.cursor/mcp.json` inside one project:
+
+```json
+{
+  "mcpServers": {
+    "humancalls": {
+      "url": "https://humancalls.ai/mcp"
+    }
+  }
+}
+```
+
+Cursor shows the server as needing sign-in. Choose it, enter your email and the six-digit code, then choose Allow. A first sign-in creates a workspace with 10 free minutes. To use an API key from the dashboard instead of the browser sign-in, send it as a Bearer token and keep the key out of files you commit:
+
+```json
+{
+  "mcpServers": {
+    "humancalls": {
+      "url": "https://humancalls.ai/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+### Claude
+
+1. Open Customize, then Connectors.
+2. Choose Add, then Add custom connector.
+3. Name it HumanCalls and paste `https://humancalls.ai/mcp`.
+4. Continue and choose Add. Claude sends you to HumanCalls to sign in.
+5. Enter your email and the six-digit code, then choose Allow.
+6. In a chat, open the + menu, choose Connectors and switch HumanCalls on.
+
+This works on every Claude plan. The free plan allows one custom connector. On a Team or Enterprise plan an owner adds it under Organization settings, then each person opens Customize, Connectors and chooses Connect.
+
+### ChatGPT
+
+1. Go to `chatgpt.com/plugins`, choose the plus button, then Add custom MCP server.
+2. Name it HumanCalls, add a short description, and under Connection paste `https://humancalls.ai/mcp`.
+3. Leave sign-in on OAuth, confirm that you want to continue, and choose Create as a plugin. ChatGPT sends you to HumanCalls.
+4. Enter your email and the six-digit code, then choose Allow. A first sign-in creates your account with 10 free minutes.
+5. In a new chat, type @ and pick HumanCalls.
+
+Adding your own app is not offered on every ChatGPT plan or workspace. If you do not see the option, your plan or your workspace admin does not allow it yet.
+
+Any other client that supports MCP over Streamable HTTP with OAuth can use the same server URL. Setup steps stay current on the [Connect page](https://humancalls.ai/connect).
 
 ## Tools
 
 | Tool | What it does | Changes anything |
 | --- | --- | --- |
-| `request_call` | Asks a person to phone a business. Returns a call id at once; the call happens later. | Yes: a real call is placed |
-| `get_call` | Status and, once finished, the summary, answers, cost and optional transcript. | No |
+| `request_call` | Creates the call: the business, number, goal and the answers to bring back. Returns a call id at once. The call happens later. | Yes: a real call is placed |
+| `get_call` | Status and, once finished, the summary, typed answers, cost, and links to the recording and transcript. | No |
 | `list_calls` | Recent calls. | No |
-| `cancel_call` | Cancels a call that hasn't started dialing. | Yes |
-| `answer_question` | Answers a question the caller asked before dialing. | Yes |
-| `add_details` | Adds information to a call that hasn't started dialing. | Yes |
+| `cancel_call` | Cancels a call that is still queued or assigned, before anyone dials. | Yes |
+| `answer_question` | Replies when the caller asks a question before dialing. | Yes |
+| `add_details` | Adds information before the first dial. | Yes |
 | `get_account` | Remaining credit and minutes. | No |
 
-In ChatGPT and Claude, calls appear as a card with status, summary, answers and cost.
+In ChatGPT and Claude, a finished call shows as a card with status, summary, answers and cost. Results are read with `get_call` when you ask. Recordings and transcripts can arrive a little after the call finishes, so ask again if those links are missing.
 
-## How it works
+## How a call runs
 
-- Calls go to businesses in the United States and Canada, during the business's local hours (8am to 9pm). Results arrive minutes to hours after a request; nothing is pushed into the chat, so ask your assistant to check.
-- Every request is checked against calling rules before anyone dials. Callers say who they are calling for and that the call is recorded, and never pretend to be you.
-- Not supported: consumer sales or cold calls, debt collection, political calls, anything deceptive, and anything needing passwords, verification codes or card numbers.
+Calls go to businesses in the United States and Canada, between 8am and 9pm in the business's local time. A result can take a few minutes, or arrive the next business morning.
 
-## Cost
+Every request is checked before anyone dials. Clear prohibited requests are declined with no charge. Callers stay inside the instructions you gave. An information request leaves purchases, bookings and cancellations unauthorized until you say otherwise.
 
-Calls are paid per connected minute from prepaid credit, capped per call. Unanswered, declined and canceled calls are free. Credit is bought on your dashboard, never through the assistant.
+These calls are not accepted: sales calls, debt collection, political calls, cold calls to consumers, sensitive healthcare workflows, and anything deceptive. Leave passwords, verification codes, full card numbers and Social Security numbers out of a request.
 
-## Privacy and support
+## Pricing
 
-[Privacy policy](https://calls.hireoverseas.com/privacy) · [Terms](https://calls.hireoverseas.com/terms) · [Support](https://calls.hireoverseas.com/support) · support@hireoverseas.com
+$1 per connected minute, rounded up to the next minute. The charge covers time after the business answers, including phone menus and hold. A call costs $0 when nobody answers, or when the request is declined or canceled. A new workspace gets 10 free minutes once the owner verifies their email. You buy more credit on your dashboard. The assistant can read the balance with `get_account`.
+
+## Links
+
+- [HumanCalls](https://humancalls.ai)
+- [API docs](https://humancalls.ai/docs)
+- [Connect a chat app](https://humancalls.ai/connect)
+- [Pricing](https://humancalls.ai/pricing)
+- [Trust and process](https://humancalls.ai/trust)
+- [Privacy policy](https://humancalls.ai/privacy)
+- [Terms](https://humancalls.ai/terms)
+
+Questions: support@humancalls.ai
 
 ## License
 
-MIT, for the files in this repository. The service itself is operated by Hire Overseas.
+MIT, for the files in this repository. The service is operated by Hire Overseas.
