@@ -1,8 +1,18 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Hire-Overseas/humancalls-mcp",
+  "title": "HumanCalls",
   "description": "A real person phones a US or Canadian business for you and reports back what was said.",
-  "version": "1.0.2",
+  "version": "1.0.3",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/Hire-Overseas/humancalls-mcp/main/.claude-plugin/icon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
   "repository": {
     "url": "https://github.com/Hire-Overseas/humancalls-mcp",
     "source": "github"
